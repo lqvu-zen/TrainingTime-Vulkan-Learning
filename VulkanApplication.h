@@ -1,10 +1,11 @@
 #pragma once
 
-#include <string>
-
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+
 #include <vector>
+#include <string>
+#include <optional>
 
 class VulkanApplication
 {
@@ -23,6 +24,20 @@ private:
 	bool CheckValidationLayerSupport();
 	void SetupDebugMessenger();
 	void PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& i_createInfo);
+	void PickPhysicalDevice();
+	void CreateLogicalDevice();
+
+	bool IsDeviceSuitable(VkPhysicalDevice device);
+	struct QueueFamilyIndices
+	{
+		std::optional<uint32_t> graphicsFamily;
+
+		bool IsComplete()
+		{
+			return graphicsFamily.has_value();
+		}
+	};
+	QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
 
 	std::vector<const char*> GetRequiredExtensions();
 

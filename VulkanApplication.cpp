@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <iostream>
+#include <map>
 
 //Extensions
 VkResult CreateDebugUtilsMessengerEXT(VkInstance i_instance, const VkDebugUtilsMessengerCreateInfoEXT* i_createInfo, const VkAllocationCallbacks* i_allocator, VkDebugUtilsMessengerEXT* i_debugMessenger)
@@ -54,6 +55,8 @@ void VulkanApplication::InitVulkan()
 {
 	CreateInstance();
 	SetupDebugMessenger();
+
+	PickPhysicalDevice();
 }
 
 void VulkanApplication::MainLoop()
@@ -141,6 +144,72 @@ void VulkanApplication::PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCr
 	i_createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
 	i_createInfo.pfnUserCallback = DebugCallback;
 	i_createInfo.pUserData = nullptr; // Optional
+}
+
+void VulkanApplication::PickPhysicalDevice()
+{
+	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+
+	uint32_t deviceCount = 0;
+	vkEnumeratePhysicalDevices(m_vkInstance, &deviceCount, nullptr);
+
+	if (deviceCount == 0)
+	{
+		throw std::runtime_error("failed to find GPUs with Vulkan support!");
+	}
+
+	std::vector<VkPhysicalDevice> devices(deviceCount);
+	vkEnumeratePhysicalDevices(m_vkInstance, &deviceCount, devices.data());
+
+	for (const VkPhysicalDevice& device : devices)
+	{
+		if (IsDeviceSuitable(device))
+		{
+			physicalDevice = device;
+			break;
+		}
+	}
+
+	if (physicalDevice == VK_NULL_HANDLE)
+	{
+		throw std::runtime_error("failed to find a suitable GPU!");
+	}
+}
+
+bool VulkanApplication::IsDeviceSuitable(VkPhysicalDevice device)
+{
+	QueueFamilyIndices indices = FindQueueFamilies(device);
+
+	return indices.IsComplete();
+}
+
+VulkanApplication::QueueFamilyIndices VulkanApplication::FindQueueFamilies(VkPhysicalDevice device)
+{
+	QueueFamilyIndices indices;
+
+	uint32_t queueFamilyCount = 0;
+	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+	std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+	vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
+	int index = 0;
+	for (const VkQueueFamilyProperties& queueFamily : queueFamilies)
+	{
+		if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+		{
+			indices.graphicsFamily = index;
+		}
+
+		if (indices.IsComplete())
+		{
+			break;
+		}
+
+		++index;
+	}
+
+	return indices;
 }
 
 bool VulkanApplication::CheckValidationLayerSupport()
