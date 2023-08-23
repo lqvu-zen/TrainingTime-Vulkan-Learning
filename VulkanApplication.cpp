@@ -69,11 +69,13 @@ void VulkanApplication::MainLoop()
 
 void VulkanApplication::CleanUp()
 {
+	vkDestroyDevice(m_device, nullptr);
+
 	if (k_enableValidationLayers) {
-		DestroyDebugUtilsMessengerEXT(m_vkInstance, m_debugMessenger, nullptr);
+		DestroyDebugUtilsMessengerEXT(m_instance, m_debugMessenger, nullptr);
 	}
 
-	vkDestroyInstance(m_vkInstance, nullptr);
+	vkDestroyInstance(m_instance, nullptr);
 
 	glfwDestroyWindow(m_glfwWindow);
 
@@ -117,7 +119,7 @@ void VulkanApplication::CreateInstance()
 		createInfo.pNext = nullptr;
 	}
 
-	if (vkCreateInstance(&createInfo, nullptr, &m_vkInstance) != VK_SUCCESS)
+	if (vkCreateInstance(&createInfo, nullptr, &m_instance) != VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to create instance!");
 	}
@@ -130,7 +132,7 @@ void VulkanApplication::SetupDebugMessenger()
 	VkDebugUtilsMessengerCreateInfoEXT createInfo;
 	PopulateDebugMessengerCreateInfo(createInfo);
 
-	if (CreateDebugUtilsMessengerEXT(m_vkInstance, &createInfo, nullptr, &m_debugMessenger) != VK_SUCCESS) 
+	if (CreateDebugUtilsMessengerEXT(m_instance, &createInfo, nullptr, &m_debugMessenger) != VK_SUCCESS) 
 	{
 		throw std::runtime_error("failed to set up debug messenger!");
 	}
@@ -148,10 +150,8 @@ void VulkanApplication::PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCr
 
 void VulkanApplication::PickPhysicalDevice()
 {
-	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-
 	uint32_t deviceCount = 0;
-	vkEnumeratePhysicalDevices(m_vkInstance, &deviceCount, nullptr);
+	vkEnumeratePhysicalDevices(m_instance, &deviceCount, nullptr);
 
 	if (deviceCount == 0)
 	{
@@ -159,21 +159,62 @@ void VulkanApplication::PickPhysicalDevice()
 	}
 
 	std::vector<VkPhysicalDevice> devices(deviceCount);
-	vkEnumeratePhysicalDevices(m_vkInstance, &deviceCount, devices.data());
+	vkEnumeratePhysicalDevices(m_instance, &deviceCount, devices.data());
 
 	for (const VkPhysicalDevice& device : devices)
 	{
 		if (IsDeviceSuitable(device))
 		{
-			physicalDevice = device;
+			m_physicalDevice = device;
 			break;
 		}
 	}
 
-	if (physicalDevice == VK_NULL_HANDLE)
+	if (m_physicalDevice == VK_NULL_HANDLE)
 	{
 		throw std::runtime_error("failed to find a suitable GPU!");
 	}
+}
+
+void VulkanApplication::CreateLogicalDevice()
+{
+	QueueFamilyIndices indices = FindQueueFamilies(m_physicalDevice);
+
+	VkDeviceQueueCreateInfo queueCreateInfo{};
+	queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+	queueCreateInfo.queueCount = 1;
+
+	float queuePriority = 1.0f;
+	queueCreateInfo.pQueuePriorities = &queuePriority;
+
+	VkPhysicalDeviceFeatures deviceFeatures{};
+
+	VkDeviceCreateInfo createInfo{};
+	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+
+	createInfo.pQueueCreateInfos = &queueCreateInfo;
+	createInfo.queueCreateInfoCount = 1;
+
+	createInfo.pEnabledFeatures = &deviceFeatures;
+
+	createInfo.enabledExtensionCount = 0;
+	
+	if (k_enableValidationLayers)
+	{
+		createInfo.enabledLayerCount = static_cast<uint32_t>(m_validationLayers.size());
+	}
+	else
+	{
+		createInfo.enabledLayerCount = 0;
+	}
+
+	if (vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_device) != VK_SUCCESS)
+	{
+		throw std::runtime_error("failed to create a logic device!");
+	}
+
+	vkGetDeviceQueue(m_device, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
 }
 
 bool VulkanApplication::IsDeviceSuitable(VkPhysicalDevice device)

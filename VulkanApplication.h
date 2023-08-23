@@ -64,7 +64,13 @@ private:
 
 	GLFWwindow* m_glfwWindow;
 
-	VkInstance m_vkInstance;
+	VkInstance m_instance;
+
+	VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
+	VkDevice m_device;
+
+	VkQueue m_graphicsQueue;
 
 	VkDebugUtilsMessengerEXT m_debugMessenger;
+
 };
