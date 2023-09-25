@@ -1,16 +1,15 @@
+#include <exception>
 #include <iostream>
-#include <stdexcept>
-#include <cstdlib>
 
-#include "VulkanApplication.h"
+#include "Application.h"
 
 int main()
 {
-	VulkanApplication vulkanApplication;
+	Application mainApplication;
 
 	try
 	{
-		vulkanApplication.Run();
+		mainApplication.Run();
 	}
 	catch (const std::exception& exception)
 	{
