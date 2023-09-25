@@ -20,6 +20,8 @@ public:
 	LogicalDevice(std::unique_ptr<ValidationLayer>& i_validationLayer, std::unique_ptr<PhysicalDevice>& i_physicalDevice);
 	~LogicalDevice();
 
+	void CleanUp();
+
 private:
 	VkDevice m_device;
 

@@ -58,6 +58,12 @@ LogicalDevice::LogicalDevice(std::unique_ptr<ValidationLayer>& i_validationLayer
 
 LogicalDevice::~LogicalDevice()
 {
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void LogicalDevice::CleanUp()
+{
 	vkDestroyDevice(m_device, nullptr);
 }
 

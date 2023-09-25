@@ -88,6 +88,8 @@ VulkanAPI::Instance::Instance(std::unique_ptr<ValidationLayer>& i_validationLaye
 
 Instance::~Instance()
 {
+	m_logicalDevice->CleanUp();
+
 	if (m_validationLayer->IsEnable()) {
 		DestroyDebugUtilsMessengerEXT(m_instance, m_debugMessenger, nullptr);
 	}
