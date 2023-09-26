@@ -9,8 +9,9 @@ namespace VulkanAPI
 {
 ///////////////////////////////////////////////////////////////////////////////
 
-VulkanAPI::PhysicalDevice::PhysicalDevice(VkInstance i_instance)
+VulkanAPI::PhysicalDevice::PhysicalDevice(VkInstance i_instance, VkSurfaceKHR i_surface)
 	: m_device(nullptr)
+	, m_surface(i_surface)
 {
 	uint32_t deviceCount = 0;
 	vkEnumeratePhysicalDevices(i_instance, &deviceCount, nullptr);
@@ -79,6 +80,13 @@ QueueFamilyIndices PhysicalDevice::FindQueueFamilies(VkPhysicalDevice device)
 		if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
 		{
 			indices.graphicsFamily = index;
+		}
+
+		VkBool32 presentSupport = false;
+		vkGetPhysicalDeviceSurfaceSupportKHR(device, index, m_surface, &presentSupport);
+
+		if (presentSupport) {
+			indices.presentFamily = index;
 		}
 
 		if (indices.IsComplete())

@@ -5,11 +5,14 @@
 #include <memory>
 #include <vector>
 
+struct GLFWwindow;
+
 namespace VulkanAPI
 {
 class ValidationLayer;
 class PhysicalDevice;
 class LogicalDevice;
+class WindowSurface;
 }
 
 namespace VulkanAPI
@@ -26,6 +29,7 @@ public:
 	VkInstance GetInstance();
 
 	void SetupDebugMessenger();
+	void CreateSurface(GLFWwindow* i_window);
 	void PickPhysicalDevice();
 	void CreateLogicalDevice();
 
@@ -45,6 +49,7 @@ private:
 
 	std::unique_ptr<PhysicalDevice> m_physicalDevice;
 	std::unique_ptr<LogicalDevice> m_logicalDevice;
+	std::unique_ptr<WindowSurface> m_windowSurface;
 
 	VkDebugUtilsMessengerEXT m_debugMessenger;
 };

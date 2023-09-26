@@ -2,6 +2,8 @@
 
 #include <memory>
 
+struct GLFWwindow;
+
 namespace VulkanAPI
 {
 class Instance;
@@ -22,6 +24,7 @@ public:
 
 	void CreateInstance();
 	void SetupDebugMessenger();
+	void CreateSurface(GLFWwindow* i_window);
 	void PickPhysicalDevice();
 	void CreateLogicalDevice();
 

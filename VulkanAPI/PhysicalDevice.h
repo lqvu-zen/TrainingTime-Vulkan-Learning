@@ -17,7 +17,7 @@ namespace VulkanAPI
 class PhysicalDevice
 {
 public:
-	PhysicalDevice(VkInstance i_instance);
+	PhysicalDevice(VkInstance i_instance, VkSurfaceKHR i_surface);
 	~PhysicalDevice();
 
 	VkPhysicalDevice GetDevice();
@@ -31,6 +31,7 @@ private:
 private:
 	VkPhysicalDevice m_device = VK_NULL_HANDLE;
 
+	VkSurfaceKHR m_surface;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

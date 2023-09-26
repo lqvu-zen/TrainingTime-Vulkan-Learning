@@ -12,9 +12,10 @@ public:
 
 	void Update();
 	bool IsClosing();
+	GLFWwindow* GetWindow();
 
 private:
-	GLFWwindow* m_glfwWindow;
+	GLFWwindow* m_window;
 
 	const uint32_t k_glfwWindowWidth = 800;
 	const uint32_t k_glfwWindowHeight = 600;

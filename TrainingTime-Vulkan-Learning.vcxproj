@@ -144,6 +144,7 @@
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="VulkanAPI\Vulkan.cpp" />
     <ClCompile Include="Window.cpp" />
+    <ClCompile Include="VulkanAPI\WindowSurface.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FileSystem.h" />
@@ -156,6 +157,7 @@
     <ClInclude Include="Application.h" />
     <ClInclude Include="VulkanAPI\Vulkan.h" />
     <ClInclude Include="Window.h" />
+    <ClInclude Include="VulkanAPI\WindowSurface.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

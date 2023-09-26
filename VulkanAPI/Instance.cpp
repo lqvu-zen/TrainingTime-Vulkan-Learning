@@ -1,14 +1,12 @@
 #include "Instance.h"
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-
 #include <iostream>
 #include <stdexcept>
 
 #include "ValidationLayer.h"
 #include "PhysicalDevice.h"
 #include "LogicalDevice.h"
+#include "WindowSurface.h"
 
 //Extensions
 VkResult CreateDebugUtilsMessengerEXT(VkInstance i_instance, const VkDebugUtilsMessengerCreateInfoEXT* i_createInfo, const VkAllocationCallbacks* i_allocator, VkDebugUtilsMessengerEXT* i_debugMessenger)
@@ -94,6 +92,8 @@ Instance::~Instance()
 		DestroyDebugUtilsMessengerEXT(m_instance, m_debugMessenger, nullptr);
 	}
 
+	m_windowSurface->CleanUp();
+
 	vkDestroyInstance(m_instance, nullptr);
 }
 
@@ -121,9 +121,16 @@ void Instance::SetupDebugMessenger()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void Instance::CreateSurface(GLFWwindow* i_window)
+{
+	m_windowSurface = std::make_unique<WindowSurface>(m_instance, i_window);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void Instance::PickPhysicalDevice()
 {
-	m_physicalDevice = std::make_unique<PhysicalDevice>(m_instance);
+	m_physicalDevice = std::make_unique<PhysicalDevice>(m_instance, m_windowSurface->GetSurface());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -29,6 +29,7 @@ void Application::InitVulkan()
 
 	m_vulkan->CreateInstance();
 	m_vulkan->SetupDebugMessenger();
+	m_vulkan->CreateSurface(m_window->GetWindow());
 	m_vulkan->PickPhysicalDevice();
 	m_vulkan->CreateLogicalDevice();
 }

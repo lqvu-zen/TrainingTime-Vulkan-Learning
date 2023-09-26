@@ -37,6 +37,13 @@ void Vulkan::SetupDebugMessenger()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void Vulkan::CreateSurface(GLFWwindow* i_window)
+{
+	m_instance->CreateSurface(i_window);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void Vulkan::PickPhysicalDevice()
 {
 	m_instance->PickPhysicalDevice();
