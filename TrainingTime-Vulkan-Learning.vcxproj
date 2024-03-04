@@ -70,6 +70,18 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>D:\Projects\TrainingTime-Vulkan-Learning\VulkanAPI;D:\Projects\TrainingTime-Vulkan-Learning;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>D:\Projects\TrainingTime-Vulkan-Learning\VulkanAPI;D:\Projects\TrainingTime-Vulkan-Learning;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>D:\Projects\TrainingTime-Vulkan-Learning\VulkanAPI;D:\Projects\TrainingTime-Vulkan-Learning;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>D:\Projects\TrainingTime-Vulkan-Learning\VulkanAPI;D:\Projects\TrainingTime-Vulkan-Learning;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -151,6 +163,7 @@
     <ClInclude Include="VulkanAPI\LogicalDevice.h" />
     <ClInclude Include="VulkanAPI\PhysicalDevice.h" />
     <ClInclude Include="VulkanAPI\QueueFamilyIndices.h" />
+    <ClInclude Include="VulkanAPI\SwapChainSupportDetails.h" />
     <ClInclude Include="VulkanAPI\ValidationLayer.h" />
     <ClInclude Include="VulkanAPI\Instance.h" />
     <ClInclude Include="resource.h" />

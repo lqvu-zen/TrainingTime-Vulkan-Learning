@@ -41,7 +41,9 @@ LogicalDevice::LogicalDevice(std::unique_ptr<ValidationLayer>& i_validationLayer
 
 	createInfo.pEnabledFeatures = &deviceFeatures;
 
-	createInfo.enabledExtensionCount = 0;
+	const std::vector<const char*> deviceExtensions = i_physicalDevice->GetDeviceExtensions();
+	createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
+	createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
 	const std::vector<const char*> validationLayers = i_validationLayer->GetLayers();
 
@@ -66,6 +68,13 @@ LogicalDevice::LogicalDevice(std::unique_ptr<ValidationLayer>& i_validationLayer
 
 LogicalDevice::~LogicalDevice()
 {
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+VkDevice LogicalDevice::GetDevice()
+{
+	return m_device;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

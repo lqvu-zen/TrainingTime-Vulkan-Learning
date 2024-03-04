@@ -1,14 +1,14 @@
 #pragma once
 
-#include <memory>
-
-struct GLFWwindow;
+#include <memory>;
 
 namespace VulkanAPI
 {
 class Instance;
 class ValidationLayer;
 }
+
+class Window;
 
 namespace VulkanAPI
 {
@@ -22,11 +22,12 @@ public:
 	Vulkan();
 	~Vulkan();
 
-	void CreateInstance();
+	void CreateInstance(std::unique_ptr<Window>& i_window);
 	void SetupDebugMessenger();
-	void CreateSurface(GLFWwindow* i_window);
+	void CreateSurface();
 	void PickPhysicalDevice();
 	void CreateLogicalDevice();
+	void CreateSwapChain();
 
 private:
 	std::unique_ptr<Instance> m_instance;

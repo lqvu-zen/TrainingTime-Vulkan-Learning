@@ -20,12 +20,12 @@ Vulkan::~Vulkan()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vulkan::CreateInstance()
+void Vulkan::CreateInstance(std::unique_ptr<Window>& i_window)
 {
 	//Add validation layers
 	m_validationLayer->AddLayer("VK_LAYER_KHRONOS_validation");
 
-	m_instance = std::make_unique<Instance>(m_validationLayer);
+	m_instance = std::make_unique<Instance>(m_validationLayer, i_window);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,9 +37,9 @@ void Vulkan::SetupDebugMessenger()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vulkan::CreateSurface(GLFWwindow* i_window)
+void Vulkan::CreateSurface()
 {
-	m_instance->CreateSurface(i_window);
+	m_instance->CreateSurface();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -52,6 +52,11 @@ void Vulkan::PickPhysicalDevice()
 void Vulkan::CreateLogicalDevice()
 {
 	m_instance->CreateLogicalDevice();
+}
+
+void Vulkan::CreateSwapChain()
+{
+	m_instance->CreateSwapChain();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

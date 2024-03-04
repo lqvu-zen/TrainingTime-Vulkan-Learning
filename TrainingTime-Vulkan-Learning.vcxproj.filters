@@ -80,5 +80,8 @@
     <ClInclude Include="VulkanAPI\WindowSurface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="VulkanAPI\SwapChainSupportDetails.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

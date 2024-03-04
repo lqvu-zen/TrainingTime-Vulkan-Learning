@@ -27,11 +27,12 @@ void Application::InitVulkan()
 {
 	m_vulkan = std::make_unique<VulkanAPI::Vulkan>();
 
-	m_vulkan->CreateInstance();
+	m_vulkan->CreateInstance(m_window);
 	m_vulkan->SetupDebugMessenger();
-	m_vulkan->CreateSurface(m_window->GetWindow());
+	m_vulkan->CreateSurface();
 	m_vulkan->PickPhysicalDevice();
 	m_vulkan->CreateLogicalDevice();
+	m_vulkan->CreateSwapChain();
 }
 
 void Application::MainLoop()
