@@ -95,6 +95,10 @@ Instance::Instance(std::unique_ptr<ValidationLayer>& i_validationLayer, std::uni
 
 Instance::~Instance()
 {
+	for (auto imageView : m_swapChainImageViews) {
+		vkDestroyImageView(m_logicalDevice->GetDevice(), imageView, nullptr);
+	}
+
 	vkDestroySwapchainKHR(m_logicalDevice->GetDevice(), m_swapChain, nullptr);
 	m_logicalDevice->CleanUp();
 
@@ -162,7 +166,8 @@ void Instance::CreateSwapChain()
 
 	uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
 
-	if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount) {
+	if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount) 
+	{
 		imageCount = swapChainSupport.capabilities.maxImageCount;
 	}
 
@@ -180,12 +185,14 @@ void Instance::CreateSwapChain()
 	QueueFamilyIndices indices = m_physicalDevice->GetQueueFamilies();
 	uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 
-	if (indices.graphicsFamily != indices.presentFamily) {
+	if (indices.graphicsFamily != indices.presentFamily) 
+	{
 		createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
 		createInfo.queueFamilyIndexCount = 2;
 		createInfo.pQueueFamilyIndices = queueFamilyIndices;
 	}
-	else {
+	else 
+	{
 		createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		createInfo.queueFamilyIndexCount = 0; // Optional
 		createInfo.pQueueFamilyIndices = nullptr; // Optional
@@ -197,7 +204,8 @@ void Instance::CreateSwapChain()
 	createInfo.clipped = VK_TRUE;
 	createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-	if (vkCreateSwapchainKHR(m_logicalDevice->GetDevice(), &createInfo, nullptr, &m_swapChain) != VK_SUCCESS) {
+	if (vkCreateSwapchainKHR(m_logicalDevice->GetDevice(), &createInfo, nullptr, &m_swapChain) != VK_SUCCESS) 
+	{
 		throw std::runtime_error("failed to create swap chain!");
 	}
 
@@ -207,6 +215,39 @@ void Instance::CreateSwapChain()
 
 	m_swapChainImageFormat = surfaceFormat.format;
 	m_swapChainExtent = extent;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void Instance::CreateImageViews()
+{
+	m_swapChainImageViews.resize(m_swapChainImages.size());
+
+	for (size_t i = 0; i < m_swapChainImages.size(); ++i) 
+	{
+		VkImageViewCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		createInfo.image = m_swapChainImages[i];
+
+		createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		createInfo.format = m_swapChainImageFormat;
+
+		createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+
+		createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		createInfo.subresourceRange.baseMipLevel = 0;
+		createInfo.subresourceRange.levelCount = 1;
+		createInfo.subresourceRange.baseArrayLayer = 0;
+		createInfo.subresourceRange.layerCount = 1;
+
+		if (vkCreateImageView(m_logicalDevice->GetDevice(), &createInfo, nullptr, &m_swapChainImageViews[i]) != VK_SUCCESS) 
+		{
+			throw std::runtime_error("failed to create image views!");
+		}
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -276,10 +317,12 @@ VkPresentModeKHR Instance::ChooseSwapPresentMode(const std::vector<VkPresentMode
 
 VkExtent2D Instance::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& i_capabilities)
 {
-	if (i_capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
+	if (i_capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) 
+	{
 		return i_capabilities.currentExtent;
 	}
-	else {
+	else 
+	{
 		int width, height;
 		glfwGetFramebufferSize(m_window->GetWindow(), &width, &height);
 

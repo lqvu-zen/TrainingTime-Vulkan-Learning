@@ -33,6 +33,7 @@ void Application::InitVulkan()
 	m_vulkan->PickPhysicalDevice();
 	m_vulkan->CreateLogicalDevice();
 	m_vulkan->CreateSwapChain();
+	m_vulkan->CreateImageViews();
 }
 
 void Application::MainLoop()

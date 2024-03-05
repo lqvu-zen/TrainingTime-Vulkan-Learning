@@ -59,5 +59,10 @@ void Vulkan::CreateSwapChain()
 	m_instance->CreateSwapChain();
 }
 
+void Vulkan::CreateImageViews()
+{
+	m_instance->CreateImageViews();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }// VulkanAPI

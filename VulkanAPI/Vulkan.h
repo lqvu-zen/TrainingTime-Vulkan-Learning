@@ -28,6 +28,7 @@ public:
 	void PickPhysicalDevice();
 	void CreateLogicalDevice();
 	void CreateSwapChain();
+	void CreateImageViews();
 
 private:
 	std::unique_ptr<Instance> m_instance;
