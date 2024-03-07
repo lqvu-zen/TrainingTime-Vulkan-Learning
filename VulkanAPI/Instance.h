@@ -65,6 +65,8 @@ private:
 	VkExtent2D m_swapChainExtent;
 	std::vector<VkImageView> m_swapChainImageViews;
 
+	VkPipelineLayout m_pipelineLayout;
+
 	std::unique_ptr<ValidationLayer>& m_validationLayer;
 
 	std::unique_ptr<PhysicalDevice> m_physicalDevice;
