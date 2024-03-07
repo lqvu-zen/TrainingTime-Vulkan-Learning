@@ -15,6 +15,7 @@
 #include "SwapChainSupportDetails.h"
 
 #include "Window.h"
+#include "FileSystem.h"
 
 //Extensions
 VkResult CreateDebugUtilsMessengerEXT(VkInstance i_instance, const VkDebugUtilsMessengerCreateInfoEXT* i_createInfo, const VkAllocationCallbacks* i_allocator, VkDebugUtilsMessengerEXT* i_debugMessenger)
@@ -41,10 +42,11 @@ namespace VulkanAPI
 {
 ///////////////////////////////////////////////////////////////////////////////
 
-Instance::Instance(std::unique_ptr<ValidationLayer>& i_validationLayer, std::unique_ptr<Window>& i_window)
+Instance::Instance(std::unique_ptr<ValidationLayer>& i_validationLayer, std::unique_ptr<Window>& i_window, std::unique_ptr<FileSystem>& i_fileSystem)
 	: m_instance(nullptr)
 	, m_validationLayer(i_validationLayer)
 	, m_window(i_window)
+	, m_fileSystem(i_fileSystem)
 {
 	if (m_validationLayer->IsEnable() && !m_validationLayer->CheckValidationLayerSupport()) {
 		throw std::runtime_error("validation layers requested, but not available!");
@@ -252,6 +254,34 @@ void Instance::CreateImageViews()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void Instance::CreateGraphicsPipeline()
+{
+	auto vertShaderCode = m_fileSystem->ReadFile("Shaders/vert.spv");
+	auto fragShaderCode = m_fileSystem->ReadFile("Shaders/frag.spv");
+
+	VkShaderModule vertShaderModule = CreateShaderModule(vertShaderCode);
+	VkShaderModule fragShaderModule = CreateShaderModule(fragShaderCode);
+
+	VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
+	vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+	vertShaderStageInfo.module = vertShaderModule;
+	vertShaderStageInfo.pName = "main";
+
+	VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
+	fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+	fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+	fragShaderStageInfo.module = fragShaderModule;
+	fragShaderStageInfo.pName = "main";
+
+	VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
+
+	vkDestroyShaderModule(m_logicalDevice->GetDevice(), fragShaderModule, nullptr);
+	vkDestroyShaderModule(m_logicalDevice->GetDevice(), vertShaderModule, nullptr);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 std::vector<const char*> Instance::GetRequiredExtensions()
 {
 	uint32_t glfwExtensionCount = 0;
@@ -336,6 +366,22 @@ VkExtent2D Instance::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& i_capabili
 
 		return actualExtent;
 	}
+}
+
+VkShaderModule Instance::CreateShaderModule(const std::vector<char>& i_code)
+{
+	VkShaderModuleCreateInfo createInfo{};
+	createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+	createInfo.codeSize = i_code.size();
+	createInfo.pCode = reinterpret_cast<const uint32_t*>(i_code.data());
+
+	VkShaderModule shaderModule;
+	if (vkCreateShaderModule(m_logicalDevice->GetDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS) 
+	{
+		throw std::runtime_error("failed to create shader module!");
+	}
+
+	return shaderModule;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

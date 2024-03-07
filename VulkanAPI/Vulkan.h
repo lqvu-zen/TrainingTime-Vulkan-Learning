@@ -9,6 +9,7 @@ class ValidationLayer;
 }
 
 class Window;
+class FileSystem;
 
 namespace VulkanAPI
 {
@@ -22,13 +23,14 @@ public:
 	Vulkan();
 	~Vulkan();
 
-	void CreateInstance(std::unique_ptr<Window>& i_window);
+	void CreateInstance(std::unique_ptr<Window>& i_window, std::unique_ptr<FileSystem>& i_fileSystem);
 	void SetupDebugMessenger();
 	void CreateSurface();
 	void PickPhysicalDevice();
 	void CreateLogicalDevice();
 	void CreateSwapChain();
 	void CreateImageViews();
+	void CreateGraphicsPipeline();
 
 private:
 	std::unique_ptr<Instance> m_instance;

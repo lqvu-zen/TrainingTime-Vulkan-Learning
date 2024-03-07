@@ -15,6 +15,7 @@ struct SwapChainSupportDetails;
 }
 
 class Window;
+class FileSystem;
 
 namespace VulkanAPI
 {
@@ -24,7 +25,7 @@ class Instance
 {
 
 public:
-	Instance(std::unique_ptr<ValidationLayer>& i_validationLayer, std::unique_ptr<Window>& i_window);
+	Instance(std::unique_ptr<ValidationLayer>& i_validationLayer, std::unique_ptr<Window>& i_window, std::unique_ptr<FileSystem>& i_fileSystem);
 	~Instance();
 
 	VkInstance GetInstance();
@@ -35,6 +36,7 @@ public:
 	void CreateLogicalDevice();
 	void CreateSwapChain();
 	void CreateImageViews();
+	void CreateGraphicsPipeline();
 
 private:
 	std::vector<const char*> GetRequiredExtensions();
@@ -49,8 +51,13 @@ private:
 	VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& i_availablePresentModes);
 	VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& i_capabilities);
 
+	VkShaderModule CreateShaderModule(const std::vector<char>& i_code);
+
 private:
 	VkInstance m_instance;
+
+	std::unique_ptr<Window>& m_window;
+	std::unique_ptr<FileSystem>& m_fileSystem;
 
 	VkSwapchainKHR m_swapChain;
 	std::vector<VkImage> m_swapChainImages;
@@ -59,7 +66,6 @@ private:
 	std::vector<VkImageView> m_swapChainImageViews;
 
 	std::unique_ptr<ValidationLayer>& m_validationLayer;
-	std::unique_ptr<Window>& m_window;
 
 	std::unique_ptr<PhysicalDevice> m_physicalDevice;
 	std::unique_ptr<LogicalDevice> m_logicalDevice;
