@@ -65,6 +65,7 @@ private:
 	std::vector<VkImageView> m_swapChainImageViews;
 
 	VkPipelineLayout m_pipelineLayout;
+	VkPipeline m_graphicsPipeline;
 
 	std::unique_ptr<Window>& m_window;
 	std::unique_ptr<FileSystem>& m_fileSystem;

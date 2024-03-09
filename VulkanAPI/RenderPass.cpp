@@ -25,9 +25,9 @@ RenderPass::~RenderPass()
 {
 }
 
-VkDevice RenderPass::GetRenderPass()
+VkRenderPass RenderPass::GetRenderPass()
 {
-	return VkDevice();
+	return m_renderPass;
 }
 
 void RenderPass::CleanUp()

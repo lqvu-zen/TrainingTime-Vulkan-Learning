@@ -12,7 +12,7 @@ public:
 	RenderPass(VkDevice i_device, VkAttachmentDescription i_colorAttachment, VkSubpassDescription i_subpass);
 	~RenderPass();
 
-	VkDevice GetRenderPass();
+	VkRenderPass GetRenderPass();
 	void CleanUp();
 
 private:
