@@ -64,6 +64,11 @@ void Vulkan::CreateImageViews()
 	m_instance->CreateImageViews();
 }
 
+void Vulkan::CreateRenderPass()
+{
+	m_instance->CreateRenderPass();
+}
+
 void Vulkan::CreateGraphicsPipeline()
 {
 	m_instance->CreateGraphicsPipeline();

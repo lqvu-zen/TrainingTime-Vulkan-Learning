@@ -11,6 +11,7 @@ class ValidationLayer;
 class PhysicalDevice;
 class LogicalDevice;
 class WindowSurface;
+class RenderPass;
 struct SwapChainSupportDetails;
 }
 
@@ -36,6 +37,7 @@ public:
 	void CreateLogicalDevice();
 	void CreateSwapChain();
 	void CreateImageViews();
+	void CreateRenderPass();
 	void CreateGraphicsPipeline();
 
 private:
@@ -56,9 +58,6 @@ private:
 private:
 	VkInstance m_instance;
 
-	std::unique_ptr<Window>& m_window;
-	std::unique_ptr<FileSystem>& m_fileSystem;
-
 	VkSwapchainKHR m_swapChain;
 	std::vector<VkImage> m_swapChainImages;
 	VkFormat m_swapChainImageFormat;
@@ -67,11 +66,14 @@ private:
 
 	VkPipelineLayout m_pipelineLayout;
 
+	std::unique_ptr<Window>& m_window;
+	std::unique_ptr<FileSystem>& m_fileSystem;
 	std::unique_ptr<ValidationLayer>& m_validationLayer;
 
 	std::unique_ptr<PhysicalDevice> m_physicalDevice;
 	std::unique_ptr<LogicalDevice> m_logicalDevice;
 	std::unique_ptr<WindowSurface> m_windowSurface;
+	std::unique_ptr<RenderPass> m_renderPass;
 
 	VkDebugUtilsMessengerEXT m_debugMessenger;
 };

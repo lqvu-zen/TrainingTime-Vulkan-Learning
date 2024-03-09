@@ -34,6 +34,7 @@ void Application::InitVulkan()
 	m_vulkan->CreateLogicalDevice();
 	m_vulkan->CreateSwapChain();
 	m_vulkan->CreateImageViews();
+	m_vulkan->CreateRenderPass();
 	m_vulkan->CreateGraphicsPipeline();
 }
 

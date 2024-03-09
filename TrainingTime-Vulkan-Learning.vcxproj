@@ -148,6 +148,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="FileSystem.cpp" />
+    <ClCompile Include="VulkanAPI\RenderPass.cpp" />
     <ClCompile Include="VulkanAPI\LogicalDevice.cpp" />
     <ClCompile Include="VulkanAPI\PhysicalDevice.cpp" />
     <ClCompile Include="VulkanAPI\ValidationLayer.cpp" />
@@ -160,6 +161,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FileSystem.h" />
+    <ClInclude Include="VulkanAPI\RenderPass.h" />
     <ClInclude Include="VulkanAPI\LogicalDevice.h" />
     <ClInclude Include="VulkanAPI\PhysicalDevice.h" />
     <ClInclude Include="VulkanAPI\QueueFamilyIndices.h" />
