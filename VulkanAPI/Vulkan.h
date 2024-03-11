@@ -32,6 +32,7 @@ public:
 	void CreateImageViews();
 	void CreateRenderPass();
 	void CreateGraphicsPipeline();
+	void CreateFramebuffers();
 
 private:
 	std::unique_ptr<Instance> m_instance;

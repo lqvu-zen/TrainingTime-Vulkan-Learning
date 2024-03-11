@@ -74,5 +74,10 @@ void Vulkan::CreateGraphicsPipeline()
 	m_instance->CreateGraphicsPipeline();
 }
 
+void Vulkan::CreateFramebuffers()
+{
+	m_instance->CreateFramebuffers();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }// VulkanAPI

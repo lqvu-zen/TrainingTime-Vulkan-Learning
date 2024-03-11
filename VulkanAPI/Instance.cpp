@@ -98,6 +98,11 @@ Instance::Instance(std::unique_ptr<ValidationLayer>& i_validationLayer, std::uni
 
 Instance::~Instance()
 {
+	for (auto framebuffer : m_swapChainFramebuffers) 
+	{
+		vkDestroyFramebuffer(m_logicalDevice->GetDevice(), framebuffer, nullptr);
+	}
+
 	vkDestroyPipeline(m_logicalDevice->GetDevice(), m_graphicsPipeline, nullptr);
 	vkDestroyPipelineLayout(m_logicalDevice->GetDevice(), m_pipelineLayout, nullptr);
 
@@ -436,6 +441,35 @@ void Instance::CreateGraphicsPipeline()
 	//Finish
 	vkDestroyShaderModule(m_logicalDevice->GetDevice(), fragShaderModule, nullptr);
 	vkDestroyShaderModule(m_logicalDevice->GetDevice(), vertShaderModule, nullptr);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void Instance::CreateFramebuffers()
+{
+	m_swapChainFramebuffers.resize(m_swapChainImageViews.size());
+
+	for (size_t i = 0; i < m_swapChainImageViews.size(); i++)
+	{
+		VkImageView attachments[] = 
+			{
+				m_swapChainImageViews[i]
+			};
+
+		VkFramebufferCreateInfo framebufferInfo{};
+		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		framebufferInfo.renderPass = m_renderPass->GetRenderPass();
+		framebufferInfo.attachmentCount = 1;
+		framebufferInfo.pAttachments = attachments;
+		framebufferInfo.width = m_swapChainExtent.width;
+		framebufferInfo.height = m_swapChainExtent.height;
+		framebufferInfo.layers = 1;
+
+		if (vkCreateFramebuffer(m_logicalDevice->GetDevice(), &framebufferInfo, nullptr, &m_swapChainFramebuffers[i]) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to create framebuffer!");
+		}
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////

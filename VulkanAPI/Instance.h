@@ -39,6 +39,7 @@ public:
 	void CreateImageViews();
 	void CreateRenderPass();
 	void CreateGraphicsPipeline();
+	void CreateFramebuffers();
 
 private:
 	std::vector<const char*> GetRequiredExtensions();
@@ -63,6 +64,7 @@ private:
 	VkFormat m_swapChainImageFormat;
 	VkExtent2D m_swapChainExtent;
 	std::vector<VkImageView> m_swapChainImageViews;
+	std::vector<VkFramebuffer> m_swapChainFramebuffers;
 
 	VkPipelineLayout m_pipelineLayout;
 	VkPipeline m_graphicsPipeline;
