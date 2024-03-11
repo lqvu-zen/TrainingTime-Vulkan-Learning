@@ -12,6 +12,7 @@ class PhysicalDevice;
 class LogicalDevice;
 class WindowSurface;
 class RenderPass;
+class CommandBuffer;
 struct SwapChainSupportDetails;
 }
 
@@ -40,6 +41,8 @@ public:
 	void CreateRenderPass();
 	void CreateGraphicsPipeline();
 	void CreateFramebuffers();
+	void CreateCommandPool();
+	void CreateCommandBuffer();
 
 private:
 	std::vector<const char*> GetRequiredExtensions();
@@ -56,15 +59,12 @@ private:
 
 	VkShaderModule CreateShaderModule(const std::vector<char>& i_code);
 
-private:
-	VkInstance m_instance;
+	void RecordCommandBuffer(VkCommandBuffer i_commandBuffer, uint32_t i_imageIndex);
 
-	VkSwapchainKHR m_swapChain;
-	std::vector<VkImage> m_swapChainImages;
-	VkFormat m_swapChainImageFormat;
-	VkExtent2D m_swapChainExtent;
-	std::vector<VkImageView> m_swapChainImageViews;
-	std::vector<VkFramebuffer> m_swapChainFramebuffers;
+private:
+	VkDebugUtilsMessengerEXT m_debugMessenger;
+
+	VkInstance m_instance;
 
 	VkPipelineLayout m_pipelineLayout;
 	VkPipeline m_graphicsPipeline;
@@ -78,7 +78,16 @@ private:
 	std::unique_ptr<WindowSurface> m_windowSurface;
 	std::unique_ptr<RenderPass> m_renderPass;
 
-	VkDebugUtilsMessengerEXT m_debugMessenger;
+	VkSwapchainKHR m_swapChain;
+	std::vector<VkImage> m_swapChainImages;
+	VkFormat m_swapChainImageFormat;
+	VkExtent2D m_swapChainExtent;
+	std::vector<VkImageView> m_swapChainImageViews;
+	std::vector<VkFramebuffer> m_swapChainFramebuffers;
+
+	VkCommandPool m_commandPool;
+
+	std::unique_ptr<CommandBuffer> m_commandBuffer;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="VulkanAPI\CommandBuffer.cpp" />
     <ClCompile Include="FileSystem.cpp" />
     <ClCompile Include="VulkanAPI\RenderPass.cpp" />
     <ClCompile Include="VulkanAPI\LogicalDevice.cpp" />
@@ -160,6 +161,7 @@
     <ClCompile Include="VulkanAPI\WindowSurface.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="VulkanAPI\CommandBuffer.h" />
     <ClInclude Include="FileSystem.h" />
     <ClInclude Include="VulkanAPI\RenderPass.h" />
     <ClInclude Include="VulkanAPI\LogicalDevice.h" />

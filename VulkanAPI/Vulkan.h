@@ -33,6 +33,8 @@ public:
 	void CreateRenderPass();
 	void CreateGraphicsPipeline();
 	void CreateFramebuffers();
+	void CreateCommandPool();
+	void CreateCommandBuffer();
 
 private:
 	std::unique_ptr<Instance> m_instance;

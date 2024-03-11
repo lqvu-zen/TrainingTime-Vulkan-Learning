@@ -79,5 +79,15 @@ void Vulkan::CreateFramebuffers()
 	m_instance->CreateFramebuffers();
 }
 
+void Vulkan::CreateCommandPool()
+{
+	m_instance->CreateCommandPool();
+}
+
+void Vulkan::CreateCommandBuffer()
+{
+	m_instance->CreateCommandBuffer();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }// VulkanAPI

@@ -37,6 +37,8 @@ void Application::InitVulkan()
 	m_vulkan->CreateRenderPass();
 	m_vulkan->CreateGraphicsPipeline();
 	m_vulkan->CreateFramebuffers();
+	m_vulkan->CreateCommandPool();
+	m_vulkan->CreateCommandBuffer();
 }
 
 void Application::MainLoop()

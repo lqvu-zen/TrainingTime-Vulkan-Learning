@@ -14,6 +14,7 @@
 #include "RenderPass.h"
 #include "QueueFamilyIndices.h"
 #include "SwapChainSupportDetails.h"
+#include "CommandBuffer.h"
 
 #include "Window.h"
 #include "FileSystem.h"
@@ -98,6 +99,8 @@ Instance::Instance(std::unique_ptr<ValidationLayer>& i_validationLayer, std::uni
 
 Instance::~Instance()
 {
+	vkDestroyCommandPool(m_logicalDevice->GetDevice(), m_commandPool, nullptr);
+
 	for (auto framebuffer : m_swapChainFramebuffers) 
 	{
 		vkDestroyFramebuffer(m_logicalDevice->GetDevice(), framebuffer, nullptr);
@@ -474,6 +477,30 @@ void Instance::CreateFramebuffers()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void Instance::CreateCommandPool()
+{
+	QueueFamilyIndices queueFamilyIndices = m_physicalDevice->GetQueueFamilies();
+
+	VkCommandPoolCreateInfo poolInfo{};
+	poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+	poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+
+	if (vkCreateCommandPool(m_logicalDevice->GetDevice(), &poolInfo, nullptr, &m_commandPool) != VK_SUCCESS)
+	{
+		throw std::runtime_error("failed to create command pool!");
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void Instance::CreateCommandBuffer()
+{
+	m_commandBuffer = std::make_unique<CommandBuffer>(m_logicalDevice->GetDevice(), m_commandPool);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 std::vector<const char*> Instance::GetRequiredExtensions()
 {
 	uint32_t glfwExtensionCount = 0;
@@ -574,6 +601,63 @@ VkShaderModule Instance::CreateShaderModule(const std::vector<char>& i_code)
 	}
 
 	return shaderModule;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void Instance::RecordCommandBuffer(VkCommandBuffer i_commandBuffer, uint32_t i_imageIndex)
+{
+	VkCommandBufferBeginInfo beginInfo{};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	beginInfo.flags = 0; // Optional
+	beginInfo.pInheritanceInfo = nullptr; // Optional
+
+	if (vkBeginCommandBuffer(m_commandBuffer->GetCommandBuffer(), &beginInfo) != VK_SUCCESS)
+	{
+		throw std::runtime_error("failed to begin recording command buffer!");
+	}
+
+	//Starting render pass
+	VkRenderPassBeginInfo renderPassInfo{};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassInfo.renderPass = m_renderPass->GetRenderPass();
+	renderPassInfo.framebuffer = m_swapChainFramebuffers[i_imageIndex];
+	
+	renderPassInfo.renderArea.offset = { 0, 0 };
+	renderPassInfo.renderArea.extent = m_swapChainExtent;
+
+	VkClearValue clearColor = { {{0.0f, 0.0f, 0.0f, 1.0f}} };
+	renderPassInfo.clearValueCount = 1;
+	renderPassInfo.pClearValues = &clearColor;
+
+	vkCmdBeginRenderPass(m_commandBuffer->GetCommandBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	//Bind Pipeline
+	vkCmdBindPipeline(m_commandBuffer->GetCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicsPipeline);
+
+	VkViewport viewport{};
+	viewport.x = 0.0f;
+	viewport.y = 0.0f;
+	viewport.width = static_cast<float>(m_swapChainExtent.width);
+	viewport.height = static_cast<float>(m_swapChainExtent.height);
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
+	vkCmdSetViewport(m_commandBuffer->GetCommandBuffer(), 0, 1, &viewport);
+
+	VkRect2D scissor{};
+	scissor.offset = { 0, 0 };
+	scissor.extent = m_swapChainExtent;
+	vkCmdSetScissor(m_commandBuffer->GetCommandBuffer(), 0, 1, &scissor);
+
+	vkCmdDraw(m_commandBuffer->GetCommandBuffer(), 3, 1, 0, 0);
+
+	//Finish render pass
+	vkCmdEndRenderPass(m_commandBuffer->GetCommandBuffer());
+
+	if (vkEndCommandBuffer(m_commandBuffer->GetCommandBuffer()) != VK_SUCCESS)
+	{
+		throw std::runtime_error("failed to record command buffer!");
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
