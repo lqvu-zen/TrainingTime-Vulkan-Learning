@@ -89,5 +89,20 @@ void Vulkan::CreateCommandBuffer()
 	m_instance->CreateCommandBuffer();
 }
 
+void Vulkan::DrawFrame()
+{
+	m_instance->DrawFrame();
+}
+
+void Vulkan::CreateSyncObjects()
+{
+	m_instance->CreateSyncObjects();
+}
+
+void Vulkan::Shutdown()
+{
+	m_instance->Shutdown();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }// VulkanAPI

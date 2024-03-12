@@ -6,7 +6,7 @@ namespace VulkanAPI
 {
 ///////////////////////////////////////////////////////////////////////////////
 
-RenderPass::RenderPass(VkDevice i_device, VkAttachmentDescription i_colorAttachment, VkSubpassDescription i_subpass)
+RenderPass::RenderPass(VkDevice i_device, VkAttachmentDescription i_colorAttachment, VkSubpassDescription i_subpass, VkSubpassDependency i_dependency)
 	: m_device(i_device)
 {
 	VkRenderPassCreateInfo renderPassInfo{};
@@ -15,6 +15,9 @@ RenderPass::RenderPass(VkDevice i_device, VkAttachmentDescription i_colorAttachm
 	renderPassInfo.pAttachments = &i_colorAttachment;
 	renderPassInfo.subpassCount = 1;
 	renderPassInfo.pSubpasses = &i_subpass;
+
+	renderPassInfo.dependencyCount = 1;
+	renderPassInfo.pDependencies = &i_dependency;
 
 	if (vkCreateRenderPass(m_device, &renderPassInfo, nullptr, &m_renderPass) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create render pass!");

@@ -99,6 +99,10 @@ Instance::Instance(std::unique_ptr<ValidationLayer>& i_validationLayer, std::uni
 
 Instance::~Instance()
 {
+	vkDestroySemaphore(m_logicalDevice->GetDevice(), m_imageAvailableSemaphore, nullptr);
+	vkDestroySemaphore(m_logicalDevice->GetDevice(), m_renderFinishedSemaphore, nullptr);
+	vkDestroyFence(m_logicalDevice->GetDevice(), m_inFlightFence, nullptr);
+
 	vkDestroyCommandPool(m_logicalDevice->GetDevice(), m_commandPool, nullptr);
 
 	for (auto framebuffer : m_swapChainFramebuffers) 
@@ -291,7 +295,17 @@ void Instance::CreateRenderPass()
 	subpass.colorAttachmentCount = 1;
 	subpass.pColorAttachments = &colorAttachmentRef;
 
-	m_renderPass = std::make_unique<RenderPass>(m_logicalDevice->GetDevice(), colorAttachment, subpass);
+	VkSubpassDependency dependency{};
+	dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+	dependency.dstSubpass = 0;
+
+	dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependency.srcAccessMask = 0;
+
+	dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+	m_renderPass = std::make_unique<RenderPass>(m_logicalDevice->GetDevice(), colorAttachment, subpass, dependency);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -379,7 +393,7 @@ void Instance::CreateGraphicsPipeline()
 	colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD; // Optional
 	colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE; // Optional
 	colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
-	colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD; // Optiona
+	colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD; // Optional
 
 	VkPipelineColorBlendStateCreateInfo colorBlending{};
 	colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
@@ -497,6 +511,88 @@ void Instance::CreateCommandPool()
 void Instance::CreateCommandBuffer()
 {
 	m_commandBuffer = std::make_unique<CommandBuffer>(m_logicalDevice->GetDevice(), m_commandPool);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void Instance::DrawFrame()
+{
+	//Waiting for the previous frame
+	vkWaitForFences(m_logicalDevice->GetDevice(), 1, &m_inFlightFence, VK_TRUE, UINT64_MAX);
+	vkResetFences(m_logicalDevice->GetDevice(), 1, &m_inFlightFence);
+
+	//Acquiring an image from the swap chain
+	uint32_t imageIndex;
+	vkAcquireNextImageKHR(m_logicalDevice->GetDevice(), m_swapChain, UINT64_MAX, m_imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+
+	//Recording the command buffer
+	vkResetCommandBuffer(m_commandBuffer->GetCommandBuffer(), 0);
+	RecordCommandBuffer(m_commandBuffer->GetCommandBuffer(), imageIndex);
+
+	//Submitting the command buffer
+	VkSubmitInfo submitInfo{};
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+	VkSemaphore waitSemaphores[] = { m_imageAvailableSemaphore };
+	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+	submitInfo.waitSemaphoreCount = 1;
+	submitInfo.pWaitSemaphores = waitSemaphores;
+	submitInfo.pWaitDstStageMask = waitStages;
+
+	submitInfo.commandBufferCount = 1;
+	VkCommandBuffer commandBuffer = m_commandBuffer->GetCommandBuffer();
+	submitInfo.pCommandBuffers = &commandBuffer;
+
+	VkSemaphore signalSemaphores[] = { m_renderFinishedSemaphore };
+	submitInfo.signalSemaphoreCount = 1;
+	submitInfo.pSignalSemaphores = signalSemaphores;
+
+	if (vkQueueSubmit(m_logicalDevice->GetGraphicsQueue(), 1, &submitInfo, m_inFlightFence) != VK_SUCCESS)
+	{
+		throw std::runtime_error("failed to submit draw command buffer!");
+	}
+
+	//Presentation
+	VkPresentInfoKHR presentInfo{};
+	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+	presentInfo.waitSemaphoreCount = 1;
+	presentInfo.pWaitSemaphores = signalSemaphores;
+
+	VkSwapchainKHR swapChains[] = { m_swapChain };
+	presentInfo.swapchainCount = 1;
+	presentInfo.pSwapchains = swapChains;
+	presentInfo.pImageIndices = &imageIndex;
+
+	presentInfo.pResults = nullptr; // Optional
+
+	vkQueuePresentKHR(m_logicalDevice->GetPresentQueue(), &presentInfo);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void Instance::CreateSyncObjects()
+{
+	VkSemaphoreCreateInfo semaphoreInfo{};
+	semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+	VkFenceCreateInfo fenceInfo{};
+	fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+	if (vkCreateSemaphore(m_logicalDevice->GetDevice(), &semaphoreInfo, nullptr, &m_imageAvailableSemaphore) != VK_SUCCESS ||
+		vkCreateSemaphore(m_logicalDevice->GetDevice(), &semaphoreInfo, nullptr, &m_renderFinishedSemaphore) != VK_SUCCESS ||
+		vkCreateFence(m_logicalDevice->GetDevice(), &fenceInfo, nullptr, &m_inFlightFence) != VK_SUCCESS)
+	{
+		throw std::runtime_error("failed to create semaphores!");
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void Instance::Shutdown()
+{
+	vkDeviceWaitIdle(m_logicalDevice->GetDevice());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

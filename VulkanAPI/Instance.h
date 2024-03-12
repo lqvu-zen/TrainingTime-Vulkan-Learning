@@ -43,6 +43,9 @@ public:
 	void CreateFramebuffers();
 	void CreateCommandPool();
 	void CreateCommandBuffer();
+	void DrawFrame();
+	void CreateSyncObjects();
+	void Shutdown();
 
 private:
 	std::vector<const char*> GetRequiredExtensions();
@@ -88,6 +91,10 @@ private:
 	VkCommandPool m_commandPool;
 
 	std::unique_ptr<CommandBuffer> m_commandBuffer;
+
+	VkSemaphore m_imageAvailableSemaphore;
+	VkSemaphore m_renderFinishedSemaphore;
+	VkFence m_inFlightFence;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

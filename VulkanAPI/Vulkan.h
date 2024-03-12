@@ -35,6 +35,9 @@ public:
 	void CreateFramebuffers();
 	void CreateCommandPool();
 	void CreateCommandBuffer();
+	void DrawFrame();
+	void CreateSyncObjects();
+	void Shutdown();
 
 private:
 	std::unique_ptr<Instance> m_instance;

@@ -39,6 +39,7 @@ void Application::InitVulkan()
 	m_vulkan->CreateFramebuffers();
 	m_vulkan->CreateCommandPool();
 	m_vulkan->CreateCommandBuffer();
+	m_vulkan->CreateSyncObjects();
 }
 
 void Application::MainLoop()
@@ -46,7 +47,10 @@ void Application::MainLoop()
 	while (!m_window->IsClosing())
 	{
 		m_window->Update();
+		m_vulkan->DrawFrame();
 	}
+
+	m_vulkan->Shutdown();
 }
 
 void Application::CleanUp()

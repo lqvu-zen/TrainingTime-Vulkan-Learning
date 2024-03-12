@@ -9,7 +9,7 @@ namespace VulkanAPI
 class RenderPass
 {
 public:
-	RenderPass(VkDevice i_device, VkAttachmentDescription i_colorAttachment, VkSubpassDescription i_subpass);
+	RenderPass(VkDevice i_device, VkAttachmentDescription i_colorAttachment, VkSubpassDescription i_subpass, VkSubpassDependency i_dependency);
 	~RenderPass();
 
 	VkRenderPass GetRenderPass();

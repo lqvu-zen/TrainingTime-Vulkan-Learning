@@ -22,6 +22,8 @@ public:
 
 	VkDevice GetDevice();
 	void CleanUp();
+	VkQueue GetGraphicsQueue();
+	VkQueue GetPresentQueue();
 
 private:
 	VkDevice m_device;

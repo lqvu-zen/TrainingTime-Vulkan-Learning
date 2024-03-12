@@ -84,5 +84,15 @@ void LogicalDevice::CleanUp()
 	vkDestroyDevice(m_device, nullptr);
 }
 
+VkQueue LogicalDevice::GetGraphicsQueue()
+{
+	return m_graphicsQueue;
+}
+
+VkQueue LogicalDevice::GetPresentQueue()
+{
+	return m_presentQueue;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }// VulkanAPI
