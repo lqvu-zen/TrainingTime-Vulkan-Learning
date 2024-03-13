@@ -42,7 +42,7 @@ public:
 	void CreateGraphicsPipeline();
 	void CreateFramebuffers();
 	void CreateCommandPool();
-	void CreateCommandBuffer();
+	void CreateCommandBuffers();
 	void DrawFrame();
 	void CreateSyncObjects();
 	void Shutdown();
@@ -63,6 +63,9 @@ private:
 	VkShaderModule CreateShaderModule(const std::vector<char>& i_code);
 
 	void RecordCommandBuffer(VkCommandBuffer i_commandBuffer, uint32_t i_imageIndex);
+
+private:
+	const int K_MAX_FRAMES_IN_FLIGHT = 2;
 
 private:
 	VkDebugUtilsMessengerEXT m_debugMessenger;
@@ -92,9 +95,11 @@ private:
 
 	std::unique_ptr<CommandBuffer> m_commandBuffer;
 
-	VkSemaphore m_imageAvailableSemaphore;
-	VkSemaphore m_renderFinishedSemaphore;
-	VkFence m_inFlightFence;
+	std::vector<VkSemaphore> m_imageAvailableSemaphores;
+	std::vector<VkSemaphore> m_renderFinishedSemaphores;
+	std::vector<VkFence> m_inFlightFences;
+
+	uint32_t m_currentFrame = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

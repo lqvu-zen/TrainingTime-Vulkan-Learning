@@ -34,7 +34,7 @@ public:
 	void CreateGraphicsPipeline();
 	void CreateFramebuffers();
 	void CreateCommandPool();
-	void CreateCommandBuffer();
+	void CreateCommandBuffers();
 	void DrawFrame();
 	void CreateSyncObjects();
 	void Shutdown();

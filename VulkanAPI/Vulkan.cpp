@@ -84,9 +84,9 @@ void Vulkan::CreateCommandPool()
 	m_instance->CreateCommandPool();
 }
 
-void Vulkan::CreateCommandBuffer()
+void Vulkan::CreateCommandBuffers()
 {
-	m_instance->CreateCommandBuffer();
+	m_instance->CreateCommandBuffers();
 }
 
 void Vulkan::DrawFrame()

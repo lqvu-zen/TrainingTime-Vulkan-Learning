@@ -38,7 +38,7 @@ void Application::InitVulkan()
 	m_vulkan->CreateGraphicsPipeline();
 	m_vulkan->CreateFramebuffers();
 	m_vulkan->CreateCommandPool();
-	m_vulkan->CreateCommandBuffer();
+	m_vulkan->CreateCommandBuffers();
 	m_vulkan->CreateSyncObjects();
 }
 

@@ -2,6 +2,8 @@
 
 #include <vulkan/vulkan.h>
 
+#include <vector>
+
 namespace VulkanAPI
 {
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,13 +11,14 @@ namespace VulkanAPI
 class CommandBuffer
 {
 public:
-	CommandBuffer(VkDevice i_device, VkCommandPool i_commandPool);
+	CommandBuffer(const int i_size, VkDevice i_device, VkCommandPool i_commandPool);
 	~CommandBuffer();
 
-	VkCommandBuffer GetCommandBuffer();
+	std::vector<VkCommandBuffer> GetCommandBuffers();
+	VkCommandBuffer GetCommandBufferAtFrame(const int i_frame);
 
 private:
-	VkCommandBuffer m_commandBuffer;
+	std::vector<VkCommandBuffer> m_commandBuffers;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
