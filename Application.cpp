@@ -35,7 +35,7 @@ void Application::MainLoop()
 	while (!m_window->IsClosing())
 	{
 		m_window->Update();
-		m_vulkan->DrawFrame();
+		m_vulkan->Update();
 	}
 
 	m_vulkan->Shutdown();

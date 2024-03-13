@@ -25,7 +25,7 @@ public:
 
 	void Init(std::unique_ptr<Window>& i_window, std::unique_ptr<FileSystem>& i_fileSystem);
 	void Shutdown();
-	void DrawFrame();
+	void Update();
 
 private:
 	std::unique_ptr<Instance> m_instance;

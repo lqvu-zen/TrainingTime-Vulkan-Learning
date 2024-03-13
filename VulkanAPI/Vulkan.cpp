@@ -50,7 +50,7 @@ void Vulkan::Shutdown()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Vulkan::DrawFrame()
+void Vulkan::Update()
 {
 	m_instance->DrawFrame();
 }
