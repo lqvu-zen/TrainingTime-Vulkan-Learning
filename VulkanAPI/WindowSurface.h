@@ -21,7 +21,7 @@ public:
 	~WindowSurface();
 
 	VkSurfaceKHR GetSurface();
-	void CleanUp();
+	void Cleanup();
 
 private:
 	VkSurfaceKHR m_surface;

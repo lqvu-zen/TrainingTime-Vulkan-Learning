@@ -33,7 +33,7 @@ VkRenderPass RenderPass::GetRenderPass()
 	return m_renderPass;
 }
 
-void RenderPass::CleanUp()
+void RenderPass::Cleanup()
 {
 	vkDestroyRenderPass(m_device, m_renderPass, nullptr);
 }

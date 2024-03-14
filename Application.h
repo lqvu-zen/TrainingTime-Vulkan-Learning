@@ -21,7 +21,7 @@ public:
 private:
 	void InitVulkan();
 	void MainLoop();
-	void CleanUp();
+	void Cleanup();
 
 private:
 	std::unique_ptr<VulkanAPI::Vulkan> m_vulkan;

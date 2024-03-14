@@ -99,41 +99,7 @@ Instance::Instance(std::unique_ptr<ValidationLayer>& i_validationLayer, std::uni
 
 Instance::~Instance()
 {
-	for (size_t i = 0; i < K_MAX_FRAMES_IN_FLIGHT; i++)
-	{
-		vkDestroySemaphore(m_logicalDevice->GetDevice(), m_renderFinishedSemaphores[i], nullptr);
-		vkDestroySemaphore(m_logicalDevice->GetDevice(), m_imageAvailableSemaphores[i], nullptr);
-		vkDestroyFence(m_logicalDevice->GetDevice(), m_inFlightFences[i], nullptr);
-	}
-
-	vkDestroyCommandPool(m_logicalDevice->GetDevice(), m_commandPool, nullptr);
-
-	for (auto framebuffer : m_swapChainFramebuffers) 
-	{
-		vkDestroyFramebuffer(m_logicalDevice->GetDevice(), framebuffer, nullptr);
-	}
-
-	vkDestroyPipeline(m_logicalDevice->GetDevice(), m_graphicsPipeline, nullptr);
-	vkDestroyPipelineLayout(m_logicalDevice->GetDevice(), m_pipelineLayout, nullptr);
-
-	m_renderPass->CleanUp();
-
-	for (auto imageView : m_swapChainImageViews) 
-	{
-		vkDestroyImageView(m_logicalDevice->GetDevice(), imageView, nullptr);
-	}
-	vkDestroySwapchainKHR(m_logicalDevice->GetDevice(), m_swapChain, nullptr);
-
-	m_logicalDevice->CleanUp();
-
-	if (m_validationLayer->IsEnable()) 
-	{
-		DestroyDebugUtilsMessengerEXT(m_instance, m_debugMessenger, nullptr);
-	}
-
-	m_windowSurface->CleanUp();
-
-	vkDestroyInstance(m_instance, nullptr);
+	Cleanup();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -522,11 +488,23 @@ void Instance::DrawFrame()
 {
 	//Waiting for the previous frame
 	vkWaitForFences(m_logicalDevice->GetDevice(), 1, &m_inFlightFences[m_currentFrame], VK_TRUE, UINT64_MAX);
-	vkResetFences(m_logicalDevice->GetDevice(), 1, &m_inFlightFences[m_currentFrame]);
 
 	//Acquiring an image from the swap chain
 	uint32_t imageIndex;
-	vkAcquireNextImageKHR(m_logicalDevice->GetDevice(), m_swapChain, UINT64_MAX, m_imageAvailableSemaphores[m_currentFrame], VK_NULL_HANDLE, &imageIndex);
+	VkResult acquireResult = vkAcquireNextImageKHR(m_logicalDevice->GetDevice(), m_swapChain, UINT64_MAX, m_imageAvailableSemaphores[m_currentFrame], VK_NULL_HANDLE, &imageIndex);
+
+	if (acquireResult == VK_ERROR_OUT_OF_DATE_KHR)
+	{
+		RecreateSwapChain();
+		return;
+	}
+	else if (acquireResult != VK_SUCCESS && acquireResult != VK_SUBOPTIMAL_KHR)
+	{
+		throw std::runtime_error("failed to acquire swap chain image!");
+	}
+
+	// Only reset the fence if we are submitting work
+	vkResetFences(m_logicalDevice->GetDevice(), 1, &m_inFlightFences[m_currentFrame]);
 
 	//Recording the command buffer
 	vkResetCommandBuffer(m_commandBuffer->GetCommandBufferAtFrame(m_currentFrame), 0);
@@ -569,7 +547,17 @@ void Instance::DrawFrame()
 
 	presentInfo.pResults = nullptr; // Optional
 
-	vkQueuePresentKHR(m_logicalDevice->GetPresentQueue(), &presentInfo);
+	VkResult queuePresentResult = vkQueuePresentKHR(m_logicalDevice->GetPresentQueue(), &presentInfo);
+
+	if (queuePresentResult == VK_ERROR_OUT_OF_DATE_KHR || queuePresentResult == VK_SUBOPTIMAL_KHR || m_window->IsFramebufferResized())
+	{
+		m_window->SetFramebufferResized(false);
+		RecreateSwapChain();
+	}
+	else if (queuePresentResult != VK_SUCCESS)
+	{
+		throw std::runtime_error("failed to present swap chain image!");
+	}
 
 	//After present
 	m_currentFrame = (m_currentFrame + 1) % K_MAX_FRAMES_IN_FLIGHT;
@@ -598,6 +586,74 @@ void Instance::CreateSyncObjects()
 			throw std::runtime_error("failed to create synchronization objects for a frame!");
 		}
 	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void Instance::RecreateSwapChain()
+{
+	while (m_window->IsMinimizing()) 
+	{
+		glfwWaitEvents();
+	}
+
+	vkDeviceWaitIdle(m_logicalDevice->GetDevice());
+
+	CleanupSwapChain();
+
+	CreateSwapChain();
+	CreateImageViews();
+	CreateFramebuffers();
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+void Instance::CleanupSwapChain()
+{
+	for (auto framebuffer : m_swapChainFramebuffers)
+	{
+		vkDestroyFramebuffer(m_logicalDevice->GetDevice(), framebuffer, nullptr);
+	}
+
+	for (auto imageView : m_swapChainImageViews)
+	{
+		vkDestroyImageView(m_logicalDevice->GetDevice(), imageView, nullptr);
+	}
+
+	vkDestroySwapchainKHR(m_logicalDevice->GetDevice(), m_swapChain, nullptr);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void Instance::Cleanup()
+{
+	CleanupSwapChain();
+
+	vkDestroyPipeline(m_logicalDevice->GetDevice(), m_graphicsPipeline, nullptr);
+	vkDestroyPipelineLayout(m_logicalDevice->GetDevice(), m_pipelineLayout, nullptr);
+
+	m_renderPass->Cleanup();
+
+	for (size_t i = 0; i < K_MAX_FRAMES_IN_FLIGHT; i++)
+	{
+		vkDestroySemaphore(m_logicalDevice->GetDevice(), m_renderFinishedSemaphores[i], nullptr);
+		vkDestroySemaphore(m_logicalDevice->GetDevice(), m_imageAvailableSemaphores[i], nullptr);
+		vkDestroyFence(m_logicalDevice->GetDevice(), m_inFlightFences[i], nullptr);
+	}
+
+	vkDestroyCommandPool(m_logicalDevice->GetDevice(), m_commandPool, nullptr);
+
+	m_logicalDevice->Cleanup();
+
+	if (m_validationLayer->IsEnable())
+	{
+		DestroyDebugUtilsMessengerEXT(m_instance, m_debugMessenger, nullptr);
+	}
+
+	m_windowSurface->Cleanup();
+
+	vkDestroyInstance(m_instance, nullptr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

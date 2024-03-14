@@ -20,7 +20,7 @@ void Application::Run()
 {
 	InitVulkan();
 	MainLoop();
-	CleanUp();
+	Cleanup();
 }
 
 void Application::InitVulkan()
@@ -37,12 +37,11 @@ void Application::MainLoop()
 		m_window->Update();
 		m_vulkan->Update();
 	}
-
-	m_vulkan->Shutdown();
 }
 
-void Application::CleanUp()
+void Application::Cleanup()
 {
+	m_vulkan->Shutdown();
 }
 
 

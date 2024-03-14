@@ -45,6 +45,11 @@ public:
 	void CreateCommandBuffers();
 	void DrawFrame();
 	void CreateSyncObjects();
+
+	void CleanupSwapChain();
+	void RecreateSwapChain();
+
+	void Cleanup();
 	void Shutdown();
 
 private:

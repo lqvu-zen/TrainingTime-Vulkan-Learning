@@ -24,7 +24,7 @@ VkSurfaceKHR WindowSurface::GetSurface()
     return m_surface;
 }
 
-void WindowSurface::CleanUp()
+void WindowSurface::Cleanup()
 {
     vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
 }

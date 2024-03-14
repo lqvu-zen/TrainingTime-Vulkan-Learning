@@ -79,7 +79,7 @@ VkDevice LogicalDevice::GetDevice()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void LogicalDevice::CleanUp()
+void LogicalDevice::Cleanup()
 {
 	vkDestroyDevice(m_device, nullptr);
 }

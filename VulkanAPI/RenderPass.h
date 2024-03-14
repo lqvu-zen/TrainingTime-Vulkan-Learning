@@ -13,7 +13,7 @@ public:
 	~RenderPass();
 
 	VkRenderPass GetRenderPass();
-	void CleanUp();
+	void Cleanup();
 
 private:
 	VkRenderPass m_renderPass;

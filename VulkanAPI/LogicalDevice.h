@@ -21,7 +21,7 @@ public:
 	~LogicalDevice();
 
 	VkDevice GetDevice();
-	void CleanUp();
+	void Cleanup();
 	VkQueue GetGraphicsQueue();
 	VkQueue GetPresentQueue();
 
