@@ -14,6 +14,7 @@
 #include "RenderPass.h"
 #include "QueueFamilyIndices.h"
 #include "SwapChainSupportDetails.h"
+#include "Buffer.h"
 #include "CommandBuffer.h"
 
 #include "Window.h"
@@ -481,6 +482,15 @@ void Instance::CreateCommandPool()
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void Instance::CreateVertexBuffer()
+{
+	m_buffer = std::make_unique<Buffer>();
+
+	m_buffer->CreateVertexBuffer(m_logicalDevice->GetDevice(), m_physicalDevice->GetDevice());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void Instance::CreateCommandBuffers()
 {
 	m_commandBuffer = std::make_unique<CommandBuffer>(K_MAX_FRAMES_IN_FLIGHT, m_logicalDevice->GetDevice(), m_commandPool);
@@ -633,6 +643,8 @@ void Instance::CleanupSwapChain()
 void Instance::Cleanup()
 {
 	CleanupSwapChain();
+
+	m_buffer->Cleanup(m_logicalDevice->GetDevice());
 
 	vkDestroyPipeline(m_logicalDevice->GetDevice(), m_graphicsPipeline, nullptr);
 	vkDestroyPipelineLayout(m_logicalDevice->GetDevice(), m_pipelineLayout, nullptr);
@@ -799,26 +811,29 @@ void Instance::RecordCommandBuffer(VkCommandBuffer i_commandBuffer, uint32_t i_i
 	renderPassInfo.pClearValues = &clearColor;
 
 	vkCmdBeginRenderPass(i_commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	{
+		//Bind Pipeline
+		vkCmdBindPipeline(i_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicsPipeline);
 
-	//Bind Pipeline
-	vkCmdBindPipeline(i_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicsPipeline);
+		VkViewport viewport{};
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = static_cast<float>(m_swapChainExtent.width);
+		viewport.height = static_cast<float>(m_swapChainExtent.height);
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vkCmdSetViewport(i_commandBuffer, 0, 1, &viewport);
 
-	VkViewport viewport{};
-	viewport.x = 0.0f;
-	viewport.y = 0.0f;
-	viewport.width = static_cast<float>(m_swapChainExtent.width);
-	viewport.height = static_cast<float>(m_swapChainExtent.height);
-	viewport.minDepth = 0.0f;
-	viewport.maxDepth = 1.0f;
-	vkCmdSetViewport(i_commandBuffer, 0, 1, &viewport);
+		VkRect2D scissor{};
+		scissor.offset = { 0, 0 };
+		scissor.extent = m_swapChainExtent;
+		vkCmdSetScissor(i_commandBuffer, 0, 1, &scissor);
 
-	VkRect2D scissor{};
-	scissor.offset = { 0, 0 };
-	scissor.extent = m_swapChainExtent;
-	vkCmdSetScissor(i_commandBuffer, 0, 1, &scissor);
+		VertexBufferDescriptor vertexBufferDescriptor = m_buffer->GetVertexBufferDescriptor();
+		vkCmdBindVertexBuffers(i_commandBuffer, 0, 1, vertexBufferDescriptor.vertexBuffers.data(), vertexBufferDescriptor.offsets.data());
 
-	vkCmdDraw(i_commandBuffer, 3, 1, 0, 0);
-
+		vkCmdDraw(i_commandBuffer, 3, 1, 0, 0);
+	}
 	//Finish render pass
 	vkCmdEndRenderPass(i_commandBuffer);
 
