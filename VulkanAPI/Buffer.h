@@ -67,22 +67,31 @@ public:
 	void Init();
 	void Cleanup(VkDevice i_device);
 
-	void CreateBuffer(VkDevice i_device, VkPhysicalDevice i_physicalDevice, VkDeviceSize i_size, VkBufferUsageFlags i_usage, VkMemoryPropertyFlags i_properties, VkBuffer& i_buffer, VkDeviceMemory& i_bufferMemory);
 	void CreateVertexBuffer(VkDevice i_device, VkPhysicalDevice i_physicalDevice, VkCommandPool i_commandPool, VkQueue i_submitQueue);
+	void CreateIndexBuffer(VkDevice i_device, VkPhysicalDevice i_physicalDevice, VkCommandPool i_commandPool, VkQueue i_submitQueue);
 	VertexBufferDescriptor GetVertexBufferDescriptor();
+	VkBuffer GetIndexBuffer();
+	uint32_t GetIndicesSize();
 
 private:
 	uint32_t FindMemoryType(VkPhysicalDevice i_physicalDevice, uint32_t i_typeFilter, VkMemoryPropertyFlags i_properties);
+	void CreateBuffer(VkDevice i_device, VkPhysicalDevice i_physicalDevice, VkDeviceSize i_size, VkBufferUsageFlags i_usage, VkMemoryPropertyFlags i_properties, VkBuffer& i_buffer, VkDeviceMemory& i_bufferMemory);
 	void CopyBuffer(VkDevice i_device, VkCommandPool i_commandPool, VkBuffer i_srcBuffer, VkBuffer i_dstBuffer, VkDeviceSize i_size, VkQueue i_submitQueue);
 
 private:
 	VkBuffer m_vertexBuffer;
 	VkDeviceMemory m_vertexBufferMemory;
+	VkBuffer m_indexBuffer;
+	VkDeviceMemory m_indexBufferMemory;
 
 	const std::vector<Vertex> m_vertices = {
-		{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-		{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-		{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+		{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+		{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+		{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+		{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
+	};
+	const std::vector<uint16_t> m_indices = {
+		0, 1, 2, 2, 3, 0
 	};
 };
 

@@ -45,7 +45,6 @@ public:
 	void CreateFramebuffers();
 	void CreateCommandPool();
 	void CreateBuffer();
-	void CreateVertexBuffer();
 	void CreateCommandBuffers();
 	void DrawFrame();
 	void CreateSyncObjects();

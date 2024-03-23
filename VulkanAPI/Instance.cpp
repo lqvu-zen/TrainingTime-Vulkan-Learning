@@ -485,13 +485,9 @@ void Instance::CreateCommandPool()
 void Instance::CreateBuffer()
 {
 	m_buffer = std::make_unique<Buffer>();
-}
 
-///////////////////////////////////////////////////////////////////////////////
-
-void Instance::CreateVertexBuffer()
-{
 	m_buffer->CreateVertexBuffer(m_logicalDevice->GetDevice(), m_physicalDevice->GetDevice(), m_commandPool, m_logicalDevice->GetGraphicsQueue());
+	m_buffer->CreateIndexBuffer(m_logicalDevice->GetDevice(), m_physicalDevice->GetDevice(), m_commandPool, m_logicalDevice->GetGraphicsQueue());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -837,7 +833,9 @@ void Instance::RecordCommandBuffer(VkCommandBuffer i_commandBuffer, uint32_t i_i
 		VertexBufferDescriptor vertexBufferDescriptor = m_buffer->GetVertexBufferDescriptor();
 		vkCmdBindVertexBuffers(i_commandBuffer, 0, 1, vertexBufferDescriptor.vertexBuffers.data(), vertexBufferDescriptor.offsets.data());
 
-		vkCmdDraw(i_commandBuffer, 3, 1, 0, 0);
+		vkCmdBindIndexBuffer(i_commandBuffer, m_buffer->GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT16);
+
+		vkCmdDrawIndexed(i_commandBuffer, m_buffer->GetIndicesSize(), 1, 0, 0, 0);
 	}
 	//Finish render pass
 	vkCmdEndRenderPass(i_commandBuffer);

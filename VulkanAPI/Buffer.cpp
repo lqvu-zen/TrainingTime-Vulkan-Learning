@@ -26,37 +26,11 @@ void Buffer::Init()
 
 void Buffer::Cleanup(VkDevice i_device)
 {
+	vkDestroyBuffer(i_device, m_indexBuffer, nullptr);
+	vkFreeMemory(i_device, m_indexBufferMemory, nullptr);
+
 	vkDestroyBuffer(i_device, m_vertexBuffer, nullptr);
 	vkFreeMemory(i_device, m_vertexBufferMemory, nullptr);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void Buffer::CreateBuffer(VkDevice i_device, VkPhysicalDevice i_physicalDevice, VkDeviceSize i_size, VkBufferUsageFlags i_usage, VkMemoryPropertyFlags i_properties, VkBuffer& i_buffer, VkDeviceMemory& i_bufferMemory)
-{
-	VkBufferCreateInfo bufferInfo{};
-	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-	bufferInfo.size = i_size;
-	bufferInfo.usage = i_usage;
-	bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-	if (vkCreateBuffer(i_device, &bufferInfo, nullptr, &i_buffer) != VK_SUCCESS) {
-		throw std::runtime_error("failed to create buffer!");
-	}
-
-	VkMemoryRequirements memRequirements;
-	vkGetBufferMemoryRequirements(i_device, i_buffer, &memRequirements);
-
-	VkMemoryAllocateInfo allocInfo{};
-	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	allocInfo.allocationSize = memRequirements.size;
-	allocInfo.memoryTypeIndex = FindMemoryType(i_physicalDevice, memRequirements.memoryTypeBits, i_properties);
-
-	if (vkAllocateMemory(i_device, &allocInfo, nullptr, &i_bufferMemory) != VK_SUCCESS) {
-		throw std::runtime_error("failed to allocate buffer memory!");
-	}
-
-	vkBindBufferMemory(i_device, i_buffer, i_bufferMemory, 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -86,6 +60,31 @@ void Buffer::CreateVertexBuffer(VkDevice i_device, VkPhysicalDevice i_physicalDe
 
 ///////////////////////////////////////////////////////////////////////////////
 
+void Buffer::CreateIndexBuffer(VkDevice i_device, VkPhysicalDevice i_physicalDevice, VkCommandPool i_commandPool, VkQueue i_submitQueue)
+{
+	VkDeviceSize bufferSize = sizeof(m_indices[0]) * m_indices.size();
+
+	VkBuffer stagingBuffer;
+	VkDeviceMemory stagingBufferMemory;
+	CreateBuffer(i_device, i_physicalDevice, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+	void* data;
+	vkMapMemory(i_device, stagingBufferMemory, 0, bufferSize, 0, &data);
+	{
+		memcpy(data, m_indices.data(), (size_t)bufferSize);
+	}
+	vkUnmapMemory(i_device, stagingBufferMemory);
+
+	CreateBuffer(i_device, i_physicalDevice, bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_indexBuffer, m_indexBufferMemory);
+
+	CopyBuffer(i_device, i_commandPool, stagingBuffer, m_indexBuffer, bufferSize, i_submitQueue);
+
+	vkDestroyBuffer(i_device, stagingBuffer, nullptr);
+	vkFreeMemory(i_device, stagingBufferMemory, nullptr);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 VertexBufferDescriptor Buffer::GetVertexBufferDescriptor()
 {
 	VertexBufferDescriptor vertexBufferDescriptor;
@@ -93,6 +92,20 @@ VertexBufferDescriptor Buffer::GetVertexBufferDescriptor()
 	vertexBufferDescriptor.offsets.push_back(0);
 
 	return vertexBufferDescriptor;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+VkBuffer Buffer::GetIndexBuffer()
+{
+	return m_indexBuffer;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+uint32_t Buffer::GetIndicesSize()
+{
+	return static_cast<uint32_t>(m_indices.size());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -111,6 +124,35 @@ uint32_t Buffer::FindMemoryType(VkPhysicalDevice i_physicalDevice, uint32_t i_ty
 	}
 
 	throw std::runtime_error("failed to find suitable memory type!");
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void Buffer::CreateBuffer(VkDevice i_device, VkPhysicalDevice i_physicalDevice, VkDeviceSize i_size, VkBufferUsageFlags i_usage, VkMemoryPropertyFlags i_properties, VkBuffer& i_buffer, VkDeviceMemory& i_bufferMemory)
+{
+	VkBufferCreateInfo bufferInfo{};
+	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	bufferInfo.size = i_size;
+	bufferInfo.usage = i_usage;
+	bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+	if (vkCreateBuffer(i_device, &bufferInfo, nullptr, &i_buffer) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create buffer!");
+	}
+
+	VkMemoryRequirements memRequirements;
+	vkGetBufferMemoryRequirements(i_device, i_buffer, &memRequirements);
+
+	VkMemoryAllocateInfo allocInfo{};
+	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+	allocInfo.allocationSize = memRequirements.size;
+	allocInfo.memoryTypeIndex = FindMemoryType(i_physicalDevice, memRequirements.memoryTypeBits, i_properties);
+
+	if (vkAllocateMemory(i_device, &allocInfo, nullptr, &i_bufferMemory) != VK_SUCCESS) {
+		throw std::runtime_error("failed to allocate buffer memory!");
+	}
+
+	vkBindBufferMemory(i_device, i_buffer, i_bufferMemory, 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
