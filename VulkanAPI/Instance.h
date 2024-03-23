@@ -44,6 +44,7 @@ public:
 	void CreateGraphicsPipeline();
 	void CreateFramebuffers();
 	void CreateCommandPool();
+	void CreateBuffer();
 	void CreateVertexBuffer();
 	void CreateCommandBuffers();
 	void DrawFrame();

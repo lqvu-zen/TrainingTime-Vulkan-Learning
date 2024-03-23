@@ -67,11 +67,13 @@ public:
 	void Init();
 	void Cleanup(VkDevice i_device);
 
-	void CreateVertexBuffer(VkDevice i_device, VkPhysicalDevice i_physicalDevice);
+	void CreateBuffer(VkDevice i_device, VkPhysicalDevice i_physicalDevice, VkDeviceSize i_size, VkBufferUsageFlags i_usage, VkMemoryPropertyFlags i_properties, VkBuffer& i_buffer, VkDeviceMemory& i_bufferMemory);
+	void CreateVertexBuffer(VkDevice i_device, VkPhysicalDevice i_physicalDevice, VkCommandPool i_commandPool, VkQueue i_submitQueue);
 	VertexBufferDescriptor GetVertexBufferDescriptor();
 
 private:
 	uint32_t FindMemoryType(VkPhysicalDevice i_physicalDevice, uint32_t i_typeFilter, VkMemoryPropertyFlags i_properties);
+	void CopyBuffer(VkDevice i_device, VkCommandPool i_commandPool, VkBuffer i_srcBuffer, VkBuffer i_dstBuffer, VkDeviceSize i_size, VkQueue i_submitQueue);
 
 private:
 	VkBuffer m_vertexBuffer;

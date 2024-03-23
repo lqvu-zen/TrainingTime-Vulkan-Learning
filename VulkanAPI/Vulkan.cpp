@@ -37,6 +37,7 @@ void Vulkan::Init(std::unique_ptr<Window>& i_window, std::unique_ptr<FileSystem>
 	m_instance->CreateGraphicsPipeline();
 	m_instance->CreateFramebuffers();
 	m_instance->CreateCommandPool();
+	m_instance->CreateBuffer();
 	m_instance->CreateVertexBuffer();
 	m_instance->CreateCommandBuffers();
 	m_instance->CreateSyncObjects();

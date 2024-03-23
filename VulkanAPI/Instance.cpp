@@ -482,11 +482,16 @@ void Instance::CreateCommandPool()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void Instance::CreateVertexBuffer()
+void Instance::CreateBuffer()
 {
 	m_buffer = std::make_unique<Buffer>();
+}
 
-	m_buffer->CreateVertexBuffer(m_logicalDevice->GetDevice(), m_physicalDevice->GetDevice());
+///////////////////////////////////////////////////////////////////////////////
+
+void Instance::CreateVertexBuffer()
+{
+	m_buffer->CreateVertexBuffer(m_logicalDevice->GetDevice(), m_physicalDevice->GetDevice(), m_commandPool, m_logicalDevice->GetGraphicsQueue());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
