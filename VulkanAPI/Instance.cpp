@@ -480,10 +480,10 @@ void Instance::CreateCommandPool()
 
 void Instance::CreateBuffer()
 {
-	m_buffer = std::make_unique<Buffer>();
+	m_buffer = std::make_unique<Buffer>(m_device, m_commandPool);
 
-	m_buffer->CreateVertexBuffer(m_device->GetDevice(), m_device->GetPhysicalDevice(), m_commandPool, m_device->GetGraphicsQueue());
-	m_buffer->CreateIndexBuffer(m_device->GetDevice(), m_device->GetPhysicalDevice(), m_commandPool, m_device->GetGraphicsQueue());
+	m_buffer->CreateVertexBuffer();
+	m_buffer->CreateIndexBuffer();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -641,7 +641,7 @@ void Instance::Cleanup()
 {
 	CleanupSwapChain();
 
-	m_buffer->Cleanup(m_device->GetDevice());
+	m_buffer->Cleanup();
 
 	vkDestroyPipeline(m_device->GetDevice(), m_graphicsPipeline, nullptr);
 	vkDestroyPipelineLayout(m_device->GetDevice(), m_pipelineLayout, nullptr);

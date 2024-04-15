@@ -30,6 +30,7 @@ public:
 	QueueFamilyIndices GetQueueFamilies();
 	std::vector<const char*> GetDeviceExtensions();
 	SwapChainSupportDetails GetSwapChainSupport();
+	uint32_t GetMemoryType(uint32_t i_typeFilter, VkMemoryPropertyFlags i_properties);
 
 	//Logical device
 	VkDevice GetDevice();
