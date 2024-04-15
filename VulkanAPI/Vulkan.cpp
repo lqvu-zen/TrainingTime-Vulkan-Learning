@@ -9,7 +9,6 @@ namespace VulkanAPI
 
 Vulkan::Vulkan()
 {
-	m_validationLayer = std::make_unique<ValidationLayer>();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -22,15 +21,11 @@ Vulkan::~Vulkan()
 
 void Vulkan::Init(std::unique_ptr<Window>& i_window, std::unique_ptr<FileSystem>& i_fileSystem)
 {
-	//Add validation layers
-	m_validationLayer->AddLayer("VK_LAYER_KHRONOS_validation");
-
 	//Init vulkan
-	m_instance = std::make_unique<Instance>(m_validationLayer, i_window, i_fileSystem);
+	m_instance = std::make_unique<Instance>(i_window, i_fileSystem);
 	m_instance->SetupDebugMessenger();
 	m_instance->CreateSurface();
-	m_instance->PickPhysicalDevice();
-	m_instance->CreateLogicalDevice();
+	m_instance->CreateDevice();
 	m_instance->CreateSwapChain();
 	m_instance->CreateImageViews();
 	m_instance->CreateRenderPass();

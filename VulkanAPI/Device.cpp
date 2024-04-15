@@ -1,22 +1,37 @@
-#include "PhysicalDevice.h"
+#include "Device.h"
 
 #include <stdexcept>
-#include <vector>
 #include <set>
 
 #include "QueueFamilyIndices.h"
+#include "ValidationLayer.h"
 #include "SwapChainSupportDetails.h"
 
 namespace VulkanAPI
 {
 ///////////////////////////////////////////////////////////////////////////////
 
-VulkanAPI::PhysicalDevice::PhysicalDevice(VkInstance i_instance, VkSurfaceKHR i_surface)
-	: m_device(nullptr)
+Device::Device(VkInstance i_instance, VkSurfaceKHR i_surface, std::unique_ptr<ValidationLayer>& i_validationLayer)
+	: m_physicalDevice(nullptr)
+	, m_device(nullptr)
+	, m_graphicsQueue(nullptr)
+	, m_instance(i_instance)
 	, m_surface(i_surface)
+	, m_validationLayer(i_validationLayer)
 {
+}
+
+Device::~Device()
+{
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void Device::Init()
+{
+	//Pick Physical Device
 	uint32_t deviceCount = 0;
-	vkEnumeratePhysicalDevices(i_instance, &deviceCount, nullptr);
+	vkEnumeratePhysicalDevices(m_instance, &deviceCount, nullptr);
 
 	if (deviceCount == 0)
 	{
@@ -24,64 +39,138 @@ VulkanAPI::PhysicalDevice::PhysicalDevice(VkInstance i_instance, VkSurfaceKHR i_
 	}
 
 	std::vector<VkPhysicalDevice> devices(deviceCount);
-	vkEnumeratePhysicalDevices(i_instance, &deviceCount, devices.data());
+	vkEnumeratePhysicalDevices(m_instance, &deviceCount, devices.data());
 
 	for (const VkPhysicalDevice& device : devices)
 	{
 		if (IsDeviceSuitable(device))
 		{
-			m_device = device;
+			m_physicalDevice = device;
 			break;
 		}
 	}
 
-	if (m_device == VK_NULL_HANDLE)
+	if (m_physicalDevice == VK_NULL_HANDLE)
 	{
 		throw std::runtime_error("failed to find a suitable GPU!");
 	}
+
+	//Create Logical Device
+	QueueFamilyIndices indices = GetQueueFamilies();
+
+	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+	std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };
+
+	float queuePriority = 1.0f;
+	for (uint32_t queueFamily : uniqueQueueFamilies)
+	{
+		VkDeviceQueueCreateInfo queueCreateInfo{};
+		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		queueCreateInfo.queueFamilyIndex = queueFamily;
+		queueCreateInfo.queueCount = 1;
+		queueCreateInfo.pQueuePriorities = &queuePriority;
+		queueCreateInfos.push_back(queueCreateInfo);
+	}
+
+	VkPhysicalDeviceFeatures deviceFeatures{};
+
+	VkDeviceCreateInfo createInfo{};
+	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+
+	createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
+	createInfo.pQueueCreateInfos = queueCreateInfos.data();
+
+	createInfo.pEnabledFeatures = &deviceFeatures;
+
+	const std::vector<const char*> deviceExtensions = GetDeviceExtensions();
+	createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
+	createInfo.ppEnabledExtensionNames = deviceExtensions.data();
+
+	const std::vector<const char*> validationLayers = m_validationLayer->GetLayers();
+
+	if (m_validationLayer->IsEnable())
+	{
+		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+		createInfo.ppEnabledLayerNames = validationLayers.data();
+	}
+	else
+	{
+		createInfo.enabledLayerCount = 0;
+	}
+
+	if (vkCreateDevice(m_physicalDevice, &createInfo, nullptr, &m_device) != VK_SUCCESS)
+	{
+		throw std::runtime_error("failed to create a logic device!");
+	}
+
+	vkGetDeviceQueue(m_device, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
+	vkGetDeviceQueue(m_device, indices.presentFamily.value(), 0, &m_presentQueue);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-PhysicalDevice::~PhysicalDevice()
+void Device::Cleanup()
 {
+	vkDestroyDevice(m_device, nullptr);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+
+VkPhysicalDevice Device::GetPhysicalDevice()
+{
+	return m_physicalDevice;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-VkPhysicalDevice PhysicalDevice::GetDevice()
+QueueFamilyIndices Device::GetQueueFamilies()
 {
-	return m_device;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-QueueFamilyIndices PhysicalDevice::GetQueueFamilies()
-{
-	QueueFamilyIndices indices = FindQueueFamilies(m_device);
+	QueueFamilyIndices indices = FindQueueFamilies(m_physicalDevice);
 
 	return indices;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::vector<const char*> PhysicalDevice::GetDeviceExtensions()
+std::vector<const char*> Device::GetDeviceExtensions()
 {
 	return m_deviceExtensions;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SwapChainSupportDetails PhysicalDevice::GetSwapChainSupport()
+SwapChainSupportDetails Device::GetSwapChainSupport()
 {
-	SwapChainSupportDetails swapChainSupportDetails = QuerySwapChainSupport(m_device);
+	SwapChainSupportDetails swapChainSupportDetails = QuerySwapChainSupport(m_physicalDevice);
 
 	return swapChainSupportDetails;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool PhysicalDevice::IsDeviceSuitable(VkPhysicalDevice i_device)
+VkDevice Device::GetDevice()
+{
+	return m_device;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+VkQueue Device::GetGraphicsQueue()
+{
+	return m_graphicsQueue;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+VkQueue Device::GetPresentQueue()
+{
+	return m_presentQueue;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+bool Device::IsDeviceSuitable(VkPhysicalDevice i_device)
 {
 	QueueFamilyIndices indices = FindQueueFamilies(i_device);
 
@@ -98,7 +187,7 @@ bool PhysicalDevice::IsDeviceSuitable(VkPhysicalDevice i_device)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-QueueFamilyIndices PhysicalDevice::FindQueueFamilies(VkPhysicalDevice i_device)
+QueueFamilyIndices Device::FindQueueFamilies(VkPhysicalDevice i_device)
 {
 	QueueFamilyIndices indices;
 
@@ -136,7 +225,7 @@ QueueFamilyIndices PhysicalDevice::FindQueueFamilies(VkPhysicalDevice i_device)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-bool PhysicalDevice::CheckDeviceExtensionSupport(VkPhysicalDevice i_device)
+bool Device::CheckDeviceExtensionSupport(VkPhysicalDevice i_device)
 {
 	uint32_t extensionCount;
 	vkEnumerateDeviceExtensionProperties(i_device, nullptr, &extensionCount, nullptr);
@@ -146,7 +235,8 @@ bool PhysicalDevice::CheckDeviceExtensionSupport(VkPhysicalDevice i_device)
 
 	std::set<std::string> requiredExtensions(m_deviceExtensions.begin(), m_deviceExtensions.end());
 
-	for (const auto& extension : availableExtensions) {
+	for (const auto& extension : availableExtensions)
+	{
 		requiredExtensions.erase(extension.extensionName);
 	}
 
@@ -155,7 +245,7 @@ bool PhysicalDevice::CheckDeviceExtensionSupport(VkPhysicalDevice i_device)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-SwapChainSupportDetails PhysicalDevice::QuerySwapChainSupport(VkPhysicalDevice i_device)
+SwapChainSupportDetails Device::QuerySwapChainSupport(VkPhysicalDevice i_device)
 {
 	SwapChainSupportDetails details;
 

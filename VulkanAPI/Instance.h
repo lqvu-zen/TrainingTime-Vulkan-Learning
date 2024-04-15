@@ -9,8 +9,7 @@
 namespace VulkanAPI
 {
 class ValidationLayer;
-class PhysicalDevice;
-class LogicalDevice;
+class Device;
 class WindowSurface;
 class RenderPass;
 class Buffer;
@@ -29,15 +28,14 @@ class Instance
 {
 
 public:
-	Instance(std::unique_ptr<ValidationLayer>& i_validationLayer, std::unique_ptr<Window>& i_window, std::unique_ptr<FileSystem>& i_fileSystem);
+	Instance(std::unique_ptr<Window>& i_window, std::unique_ptr<FileSystem>& i_fileSystem);
 	~Instance();
 
 	VkInstance GetInstance();
 
 	void SetupDebugMessenger();
 	void CreateSurface();
-	void PickPhysicalDevice();
-	void CreateLogicalDevice();
+	void CreateDevice();
 	void CreateSwapChain();
 	void CreateImageViews();
 	void CreateRenderPass();
@@ -78,6 +76,7 @@ private:
 private:
 	VkDebugUtilsMessengerEXT m_debugMessenger;
 
+	std::unique_ptr<ValidationLayer> m_validationLayer;
 	VkInstance m_instance;
 
 	VkPipelineLayout m_pipelineLayout;
@@ -85,10 +84,8 @@ private:
 
 	std::unique_ptr<Window>& m_window;
 	std::unique_ptr<FileSystem>& m_fileSystem;
-	std::unique_ptr<ValidationLayer>& m_validationLayer;
 
-	std::unique_ptr<PhysicalDevice> m_physicalDevice;
-	std::unique_ptr<LogicalDevice> m_logicalDevice;
+	std::unique_ptr<Device> m_device;
 	std::unique_ptr<WindowSurface> m_windowSurface;
 	std::unique_ptr<RenderPass> m_renderPass;
 

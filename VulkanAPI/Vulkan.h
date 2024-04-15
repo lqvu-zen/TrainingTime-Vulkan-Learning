@@ -5,7 +5,6 @@
 namespace VulkanAPI
 {
 class Instance;
-class ValidationLayer;
 }
 
 class Window;
@@ -29,8 +28,6 @@ public:
 
 private:
 	std::unique_ptr<Instance> m_instance;
-	std::unique_ptr<ValidationLayer> m_validationLayer;
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////

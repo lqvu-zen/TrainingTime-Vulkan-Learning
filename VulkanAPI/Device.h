@@ -7,7 +7,7 @@
 
 namespace VulkanAPI
 {
-class Instance;
+class ValidationLayer;
 struct QueueFamilyIndices;
 struct SwapChainSupportDetails;
 }
@@ -16,16 +16,25 @@ namespace VulkanAPI
 {
 ///////////////////////////////////////////////////////////////////////////////
 
-class PhysicalDevice
+class Device
 {
 public:
-	PhysicalDevice(VkInstance i_instance, VkSurfaceKHR i_surface);
-	~PhysicalDevice();
+	Device(VkInstance i_instance, VkSurfaceKHR i_surface, std::unique_ptr<ValidationLayer>& i_validationLayer);
+	~Device();
 
-	VkPhysicalDevice GetDevice();
+	void Init();
+	void Cleanup();
+
+	//Physical device
+	VkPhysicalDevice GetPhysicalDevice();
 	QueueFamilyIndices GetQueueFamilies();
 	std::vector<const char*> GetDeviceExtensions();
 	SwapChainSupportDetails GetSwapChainSupport();
+
+	//Logical device
+	VkDevice GetDevice();
+	VkQueue GetGraphicsQueue();
+	VkQueue GetPresentQueue();
 
 private:
 	bool IsDeviceSuitable(VkPhysicalDevice i_device);
@@ -34,13 +43,22 @@ private:
 	SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice i_device);
 
 private:
-	VkPhysicalDevice m_device = VK_NULL_HANDLE;
+	//Physical device
+	VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
 
+	VkInstance m_instance;
 	VkSurfaceKHR m_surface;
+	std::unique_ptr<ValidationLayer>& m_validationLayer;
 
 	const std::vector<const char*> m_deviceExtensions = {
 		VK_KHR_SWAPCHAIN_EXTENSION_NAME
 	};
+
+	//Logical device
+	VkDevice m_device;
+
+	VkQueue m_graphicsQueue;
+	VkQueue m_presentQueue;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

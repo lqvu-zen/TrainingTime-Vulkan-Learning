@@ -36,10 +36,7 @@
     <ClCompile Include="VulkanAPI\ValidationLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="VulkanAPI\PhysicalDevice.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="VulkanAPI\LogicalDevice.cpp">
+    <ClCompile Include="VulkanAPI\Device.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="VulkanAPI\WindowSurface.cpp">
@@ -77,13 +74,10 @@
     <ClInclude Include="VulkanAPI\ValidationLayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VulkanAPI\PhysicalDevice.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="VulkanAPI\QueueFamilyIndices.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VulkanAPI\LogicalDevice.h">
+    <ClInclude Include="VulkanAPI\Device.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="VulkanAPI\WindowSurface.h">
